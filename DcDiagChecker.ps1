@@ -1,6 +1,6 @@
 #--------------------------------------------------------------#
 #Section 1 
-#Define variables that are used throughout the script.
+#Define Variables That Are Used Throughout The Script.
 #--------------------------------------------------------------#
 
 
@@ -49,7 +49,7 @@ $NTDSDirectory = "c:\windows\NTDS"
 
 #--------------------------------------------------------------#
 #Section 2
-#Determine Whether The Server Is an AD Server or Not
+#Determine Whether The Server Is An AD Server Or Not
 #--------------------------------------------------------------#
 
 
@@ -66,7 +66,7 @@ else
 
 #--------------------------------------------------------------#
 #Section 3
-#Create Directories & Event Log Sources if Necessary
+#Create Directories & Event Log Sources If Necessary
 #--------------------------------------------------------------#
 
 
@@ -103,7 +103,7 @@ dcdiag /c /v | out-file -FilePath $("$Path\$Date.txt")
 
 #--------------------------------------------------------------#
 #Section 5
-#Check DCDIAG for Errors
+#Check DCDIAG For Errors
 #--------------------------------------------------------------#
 
 
@@ -118,13 +118,15 @@ else
       Write-EventLog -LogName $LogName -Source $Source -EventID $EventID -EntryType $EntryTypeSuccess -Message $MessageSuccess
 }
 
-#You should create a task in your monitoring system that checks the $LogName event logs for event ID $EventID, and alerts you if the event is detected. You can also add code to use powershell
-#to send you an email if that is preferred.
+#You should create a task in your monitoring system that checks the $LogName event logs for event ID $EventID, and alerts you if the event is detected. 
+#You can also add code to use powershell to send you an email if that is preferred. Sample Powershell Send-MailMessage code is below.
+#The sample code has not been tested and is commented out since I do not require emails for these alerts.
 
+#Send-MailMessage -From 'User01 ' -To 'User02 ', 'User03 ' -Subject 'DCDIAG Failed' -Body $MessageError -Attachments $Path\$Date.txt -Priority High -SmtpServer 'smtp.domain.com'
 
 #--------------------------------------------------------------#
 #Section 6
-#Delete old DCDIAG files
+#Delete Old DCDIAG Files
 #--------------------------------------------------------------#
 
 
