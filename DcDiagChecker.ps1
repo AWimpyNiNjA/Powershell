@@ -23,6 +23,14 @@ $Message = "DCDIAG Detected Errors in Active Directory. Check $Path\$date.txt fo
 #Pattern can be changed to whatever word you want to look for in the dcdiag file that gets generated.
 $Pattern = "fail"
 
+#$FileAgeLimit can be changed to however long you want to retain dcdiag records. Set to 30 by default.
+$FileAgeLimit = "-30"
+
+#Todays date. $Date is formatted, whereas $TodaysDate is not formatted. I do not recommend changing this.
+$TodaysDate = Get-Date
+
+#Variable for deleting files older than todays date - $FileAgeLimit.
+$DeleteFilesOlderThan = $TodaysDate.AddDays($FileAgeLimit)
 
 #Check if the $Path directory exists. If the directory exists, nothing happens. If the directory does not exist, it is created.
 if([IO.Directory]::Exists($Path))
@@ -61,3 +69,6 @@ else
 
 #You should create a task in your monitoring system that checks the $LogName event logs for event ID $EventID, and alerts you if the event is detected. You can also add code to use powershell
 #to send you an email if that is preferred.
+
+#Parse the $Path directory for files older than 30 days. If any files exist that are older than 30 days, they are deleted.
+Get-ChildItem $Path | Where-Object { $_.LastWriteTime -lt $DeleteFilesOlderThan } | Remove-Item
