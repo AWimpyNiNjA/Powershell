@@ -1,4 +1,8 @@
-#Define variables that will be used throughout the script.
+#--------------------------------------------------------------#
+#Define variables that are used throughout the script.
+#--------------------------------------------------------------#
+
+
 #Path can be changed to whatever path you want to use on your servers.
 $Path = "C:\admin\dcdiaglogs"
 
@@ -35,6 +39,12 @@ $DeleteFilesOlderThan = $TodaysDate.AddDays($FileAgeLimit)
 #Default AD NTDS Directory
 $NTDSDirectory = "c:\windows\NTDS"
 
+
+#--------------------------------------------------------------#
+#Determine Whether The Server Is an AD Server or Not
+#--------------------------------------------------------------#
+
+
 #Verify whether the server is an AD server or not by checking if c:\windows\NTDS exists. If it does not exist, the code exits immediately.
 if([IO.Directory]::Exists($NTDSDirectory))
 {
@@ -44,6 +54,12 @@ else
 {
     exit
 }
+
+
+#--------------------------------------------------------------#
+#Create Directories & Event Log Sources if Necessary
+#--------------------------------------------------------------#
+
 
 #Check if the $Path directory exists. If the directory exists, nothing happens. If the directory does not exist, it is created.
 if([IO.Directory]::Exists($Path))
@@ -66,8 +82,18 @@ else
 }
 
 
+#--------------------------------------------------------------#
+#Run DCDIAG
+#--------------------------------------------------------------#
+
+
 #Run a full, verbose, DCDIAG and output the results to a txt file called $Date.txt in $Path. /c = full DCDIAG. /v = verbose.
 dcdiag /c /v | out-file -FilePath $("$Path\$Date.txt")
+
+
+#--------------------------------------------------------------#
+#Check DCDIAG for Errors
+#--------------------------------------------------------------#
 
 
 #Parse the $Date.txt file for any variation of the word $Pattern. If $Pattern is detected, create an $EntryType in the $LogName event log with event ID $EventID.
@@ -82,6 +108,12 @@ else
 
 #You should create a task in your monitoring system that checks the $LogName event logs for event ID $EventID, and alerts you if the event is detected. You can also add code to use powershell
 #to send you an email if that is preferred.
+
+
+#--------------------------------------------------------------#
+#Delete old DCDIAG files
+#--------------------------------------------------------------#
+
 
 #Parse the $Path directory for files older than 30 days. If any files exist that are older than 30 days, they are deleted.
 Get-ChildItem $Path | Where-Object { $_.LastWriteTime -lt $DeleteFilesOlderThan } | Remove-Item
