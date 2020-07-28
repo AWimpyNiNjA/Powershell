@@ -32,6 +32,19 @@ $TodaysDate = Get-Date
 #Variable for deleting files older than todays date - $FileAgeLimit.
 $DeleteFilesOlderThan = $TodaysDate.AddDays($FileAgeLimit)
 
+#Default AD NTDS Directory
+$NTDSDirectory = "c:\windows\NTDS"
+
+#Verify whether the server is an AD server or not by checking if c:\windows\NTDS exists. If it does not exist, the code exits immediately.
+if([IO.Directory]::Exists($NTDSDirectory))
+{
+    #Do Nothing
+}
+else
+{
+    exit
+}
+
 #Check if the $Path directory exists. If the directory exists, nothing happens. If the directory does not exist, it is created.
 if([IO.Directory]::Exists($Path))
 {
