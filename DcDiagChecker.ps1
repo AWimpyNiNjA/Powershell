@@ -3,7 +3,7 @@
 $Path = "C:\admin\dcdiaglogs"
 
 #Date can be changed or reformatted.
-$Date = (Get-Date).ToString(“MM/dd/yyyy”).Replace(“/”,”-“)
+$Date = (Get-Date).ToString(â€œMM/dd/yyyyâ€).Replace(â€œ/â€,â€-â€œ)
 
 #Source can be changed to whichever source you want to use.
 $Source = "DCDIAG"
