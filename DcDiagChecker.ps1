@@ -34,7 +34,7 @@ $MessageSuccess = "DCDIAG ran and did not detect the word $Pattern in the log fi
 #Pattern can be changed to whatever word you want to look for in the dcdiag file that gets generated.
 $Pattern = "fail"
 
-#$FileAgeLimit can be changed to however long you want to retain dcdiag records. Set to 30 by default.
+#FileAgeLimit can be changed to however long you want to retain dcdiag records. Set to 30 by default.
 $FileAgeLimit = "-30"
 
 #Todays date. $Date is formatted, whereas $TodaysDate is not formatted. I do not recommend changing this.
@@ -43,8 +43,11 @@ $TodaysDate = Get-Date
 #Variable for deleting files older than todays date - $FileAgeLimit.
 $DeleteFilesOlderThan = $TodaysDate.AddDays($FileAgeLimit)
 
-#Default AD NTDS Directory
-$NTDSDirectory = "c:\windows\NTDS"
+#Default AD NTDS Directory - ***No longer used since the code in section 2 was replaced with code to query Get-WindowsFeature for AD-Domain-Services***
+#$NTDSDirectory = "c:\windows\NTDS"
+
+#Variable used to determine if AD Domain Services is Installed or Not
+$ADInstalled = Get-WindowsFeature -Name "AD-Domain-Services"
 
 
 #--------------------------------------------------------------#
@@ -53,8 +56,8 @@ $NTDSDirectory = "c:\windows\NTDS"
 #--------------------------------------------------------------#
 
 
-#Verify whether the server is an AD server or not by checking if c:\windows\NTDS exists. If it does not exist, the code exits immediately.
-if([IO.Directory]::Exists($NTDSDirectory))
+#Verify whether or not the server is an AD server by checking if the state of $ADInstalled.InstallState is Installed
+if ($ADInstalled.InstallState -eq 'Installed')
 {
     #Do Nothing
 }
@@ -62,6 +65,18 @@ else
 {
     exit
 }
+
+
+#Verify whether the server is an AD server or not by checking if c:\windows\NTDS exists. If it does not exist, the code exits immediately.
+#This was the original code to determine whether or not AD was installed. The code above is more accurate.
+#if([IO.Directory]::Exists($NTDSDirectory))
+#{
+    #Do Nothing
+#}
+#else
+#{
+#    exit
+#}
 
 
 #--------------------------------------------------------------#
