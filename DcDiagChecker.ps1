@@ -5,7 +5,8 @@
 
 
 #Path can be changed to whatever path you want to use on your servers.
-$Path = "C:\admin\dcdiaglogs"
+$Path = "C:\admin\dcdiaglogs" #Path for DCDIAG
+$RepPath = "C:\admin\replogs" #Path for Repadmin
 
 #Date can be changed or reformatted.
 $Date = (Get-Date).ToString("MM/dd/yyyy").Replace("/","-")
@@ -95,6 +96,17 @@ else
     New-Item -ItemType directory -Path $Path
 }
 
+#Check if the $RepPath directory exists. If the directory exists, nothing happens. If the directory does not exist, it is created.
+if([IO.Directory]::Exists($RepPath))
+{
+    #Do Nothing
+}
+else
+{
+    New-Item -ItemType directory -Path $RepPath
+}
+
+
 #Check if the event log source $Source exists. If the source exists, nothing happens. If the source does not exist, it is created.
 if ([System.Diagnostics.EventLog]::SourceExists($Source) -eq $False) 
 {
@@ -108,13 +120,13 @@ else
 
 #--------------------------------------------------------------#
 #Section 4
-#Run DCDIAG
+#Run DCDIAG & Repadmin
 #--------------------------------------------------------------#
 
 
 #Run a full, verbose, DCDIAG and output the results to a txt file called $Date.txt in $Path. /c = full DCDIAG. /v = verbose.
 dcdiag /c /v | out-file -FilePath $("$Path\$Date.txt")
-
+repadmin /replsummary | out-file -FilePath $("$RepPath\$Date.txt")
 
 #--------------------------------------------------------------#
 #Section 5
