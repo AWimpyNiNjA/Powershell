@@ -159,3 +159,6 @@ else
 
 #Parse the $Path directory for files older than 30 days. If any files exist that are older than 30 days, they are deleted.
 Get-ChildItem $Path | Where-Object { $_.LastWriteTime -lt $DeleteFilesOlderThan } | Remove-Item
+
+#Parse the $RepPath directory for files older than 30 days. If any files exist that are older than 30 days, they are deleted.
+Get-ChildItem $RepPath | Where-Object { $_.LastWriteTime -lt $DeleteFilesOlderThan } | Remove-Item
