@@ -1,0 +1,5 @@
+#Run this script from a domain controller.
+#This queries AD for enabled users that have logged on in the last 45 days.
+#Change -45 to any number to use that date for a query.
+#For example, if you want to count all users that have logged on in the last 90 days, change -45 to -90.
+(Get-ADUser -Filter {Enabled -eq $True} -Properties Name,LastLogonDate | Where {($_.LastLogonDate -ge (Get-Date).AddDays(-45)) -and ($_.LastLogonDate -ne $Null)}).Count
