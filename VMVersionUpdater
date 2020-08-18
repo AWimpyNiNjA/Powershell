@@ -1,0 +1,30 @@
+#--------------------------------------------------------------#
+# This script updates the configuration version of guest servers
+# on a hyper-v host. It will bring all servers up to the latest
+# version supported by the host. This script works on all
+# Versions of Windows Server.
+#--------------------------------------------------------------#
+#--------------------------------------------------------------#
+#Section 1 
+#Define Variables That Are Used Throughout The Script.
+#--------------------------------------------------------------#
+
+# Get default VM Version of host
+$VMVersion = (Get-VMHostSupportedVersion -Default)
+
+# Get list of guest servers with a lower version than $VMVersion
+$GuestServers = (Get-VM | where {$_.Version -lt $VMVersion.Version.Major})
+
+#--------------------------------------------------------------#
+#Section 2 
+#Simple For loop to update each server to the latest version
+#--------------------------------------------------------------#
+
+# For each server in $GuestServers, shutdown the server, update the
+# VM Version to the latest verion, start the server.
+
+foreach ($Server in $GuestServers){
+    Stop-VM -Name $Server
+    Update-VMVersion $Server
+    Start-VM -Name $Server
+}
