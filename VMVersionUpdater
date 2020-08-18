@@ -20,11 +20,20 @@ $GuestServers = (Get-VM | where {$_.Version -lt $VMVersion.Version.Major})
 #Simple For loop to update each server to the latest version
 #--------------------------------------------------------------#
 
+# Check $GuestServers for data, and only run if $GuestServers has Servers in it.
+if (!$GuestServers){
+
+    # Do Nothing if empty
+} 
+
+else{
+    
 # For each server in $GuestServers, shutdown the server, update the
 # VM Version to the latest verion, start the server.
-
 foreach ($Server in $GuestServers){
     Stop-VM -Name $Server
     Update-VMVersion $Server
     Start-VM -Name $Server
+}
+
 }
