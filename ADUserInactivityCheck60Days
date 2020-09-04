@@ -1,0 +1,91 @@
+#--------------------------------------------------------------#
+#Section 1 
+#Define Variables That Are Used Throughout The Script.
+#--------------------------------------------------------------#
+
+#Source can be changed to whichever source you want to use.
+$Source = "ADUserInactivityCheck"
+
+#EventID can be changed to whichever event ID you want to use. (1-65535)
+$EventIDNoneFound = 65535
+
+#EventID can be changed to whichever event ID you want to use. (1-65535)
+$EventIDUsersFound = 65533
+
+#LogName can be changed to whichever log you want to write to. (ex: Application, Security, etc...)
+$LogName = "Application"
+
+#MessageNoneFound should be changed to a message that is meaningful to you. This is only an example.
+$MessageNoneFound = "There are no users in active directory that have been inactive for 60 days or more"
+
+#MessageUsersFound should be changed to a message that is meaningful to you. This is only an example.
+$MessageUsersFound = "The following users have not logged on in the last 60 days: 
+$(foreach ($user in $InactiveADUsers){Write-Output $user.Name `n})"
+
+#Variable used to determine if AD Domain Services is Installed or Not
+$ADInstalled = Get-WindowsFeature -Name "AD-Domain-Services"
+
+#EntryTypeNoneFound can be changed to whichever entry type you want to use (ex: Informational, Warning, etc...)
+$EntryTypeNoneFound = "Information"
+
+#EntryTypeUsersFound can be changed to whichever entry type you want to use (ex: Informational, Warning, etc...)
+$EntryTypeUsersFound = "Information"
+
+#--------------------------------------------------------------#
+#Section 2
+#Determine Whether The Server Is An AD Server Or Not
+#--------------------------------------------------------------#
+
+#Verify whether or not the server is an AD server by checking if the state of $ADInstalled.InstallState is Installed
+if ($ADInstalled.InstallState -eq 'Installed')
+{
+    #Do Nothing
+}
+else
+{
+    exit
+}
+
+#--------------------------------------------------------------#
+#Section 3
+#Create Event Log Sources If Necessary
+#--------------------------------------------------------------#
+
+#Check if the event log source $Source exists. If the source exists, nothing happens. If the source does not exist, it is created.
+if ([System.Diagnostics.EventLog]::SourceExists($Source) -eq $False) 
+{
+    New-EventLog -LogName $LogName -Source $Source
+}
+else
+{
+    #Do Nothing
+}
+
+#--------------------------------------------------------------#
+#Section 4
+#Run AD Inactivity Check
+#--------------------------------------------------------------#
+
+#Import Active Directory Module
+Import-Module activedirectory
+
+#Store the results of the AD Inactivity Check In $InactiveADUsers
+$InactiveADUsers = (search-adaccount -usersonly -accountinactive -timespan 60.00:00:00)
+
+#Check $InactiveADUsers for data
+#If $InactiveADUsers is empty, write the results to the $Source log with EventID $EventIDNoneFound and message $MessageNoneFound
+#If $InactiveADUsers contains data, write the results to the $Source log with EventID $EventIDUsersFound and message $MessageUsersFound
+if(!$InactiveADUsers)
+{
+      Write-EventLog -LogName $LogName -Source $Source -EventID $EventIDNoneFound -EntryType $EntryTypeNoneFound -Message $MessageNoneFound
+}
+else
+{
+      Write-EventLog -LogName $LogName -Source $Source -EventID $EventIDUsersFound -EntryType $EntryTypeUsersFound -Message $MessageUsersFound
+      #Optional - Uncomment out the line below to allow this script to automatically disable the accounts that were detected in $InactiveADUsers
+      #$InactiveADUsers | Disable-ADAccount 
+}
+
+#If you have not automatically disabled the found accounts, then
+#From here, you can create a monitor in your RMM for $EventIDNoneFound 
+#And $EventIDUsersFound and do what you want with the results of $InactiveADUsers
