@@ -1,0 +1,69 @@
+#--------------------------------------------------------------#
+#Section 1 
+#Define Variables That Are Used Throughout The Script.
+#--------------------------------------------------------------#
+
+#Define Install File Path For The MSI - Recommend using the domain netlogon folder.
+$ProgramPath = "\\example.domain.com\NETLOGON\program.msi"
+
+#Define Service Name Variable
+$ProgramService = Get-Service -Name "ServiceNameGoesHere" -ErrorAction SilentlyContinue
+
+#Define MSIEXEC Arguments - You can add things like /a /quiet to the Argument. ex: "/a $ProgramPath /quiet" instead of just "$ProgramPath"
+$Arguments = "$ProgramPath"
+
+#Define Custom Eventlog Source
+$Source = "EventLogSource"
+
+#Define Custom EventID. This can be any number from 1-65535. 65500 is only an example.
+$EventId = "65500"
+
+#Define Eventlog Entrytype. This can also be "Error", "Warning".
+$EntryType = "Information"
+
+#Define eventlog logname. This can be any existing eventlog ex: "System", "Security".
+$LogName = "Application"
+
+#Define Installation Message.
+$InstallMessage = "Program was Installed"
+
+#Define Service Start Message
+$ServiceStartMessage = "Program Service Started"
+
+#Define Null Message
+$NullMessage = "The program was already installed and the service was running."
+
+#--------------------------------------------------------------#
+#Section 2
+#Check if the custom event log source already exists.
+#If it does not exist, create it.
+#--------------------------------------------------------------#
+
+if ([System.Diagnostics.EventLog]::SourceExists($Source) -eq $False) 
+{
+    New-EventLog -LogName $LogName -Source $Source
+}
+else
+{
+    #Do Nothing
+}
+
+#--------------------------------------------------------------#
+#Section 3
+#Check services and deploy agent if necessary.
+#--------------------------------------------------------------#
+
+#Check $ProgramService to determine if the service exists.
+#If the service does not exist, install the agent.
+#If the service exists, but is stopped, start the service.
+#Otherwise do nothing
+If ($null -eq $ProgramService){
+    Start-Process msiexec.exe -ArgumentList "$Arguments" -Wait
+    Write-EventLog -LogName $LogName -Source $Source -EventID $EventID -EntryType $EntryType -Message $InstallMessage
+}elseif ($ProgramService.status -eq "Stopped"){
+    Start-Service -Name "$ProgramService"
+    Write-EventLog -LogName $LogName -Source $Source -EventID $EventID -EntryType $EntryType -Message $ServiceStartMessage
+}else {
+    #Do Nothing except write to the event logs
+    Write-EventLog -LogName $LogName -Source $Source -EventID $EventID -EntryType $EntryType -Message $NullMessage
+}
