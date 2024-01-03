@@ -1,0 +1,59 @@
+#--------------------------------------------------------------#
+#Section 1 
+#Define Variables That Are Used Throughout The Script.
+#--------------------------------------------------------------#
+
+#Find PS Major version number
+$major = $psversiontable.psversion.major
+
+#Find PS Minor version number.
+$minor = $psversiontable.PSVersion.minor
+
+#Concatenate the two to find the full version number
+$currentversion = "$($major).$($minor)"
+
+
+#--------------------------------------------------------------#
+#Section 2
+#Run the script to update PS to 5.1.
+#--------------------------------------------------------------#
+
+#If $currentversion is less than 5.1, the script will run and update PS to 5.1.
+#If $currentversion is equal to or greater than 5.1, the script will quit.
+if ($currentversion -lt 5.1)
+{
+    #Define destination path for the .MSU file.
+    $Path = C:\Admin
+
+    #Check if the $Path directory exists. If the directory exists, nothing happens. If the directory does not exist, it is created.
+    if([IO.Directory]::Exists($Path))
+    {
+        #Do Nothing
+    }
+    else
+    {
+        New-Item -ItemType directory -Path $Path
+    }
+
+    #Define the URL where the system will download the .MSU file required to update to 5.1. 
+
+    # Server 2012
+    # $url = "https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/W2K12-KB3191565-x64.msu"
+
+    # Server 2012R2 & Win 8.1
+    $url = "https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win8.1AndW2K12R2-KB3191564-x64.msu"
+    
+    #Define the destination path and name of the downloaded .MSU file.
+    $outpath = "C:\Admin\psinstall.msu"
+
+    #Invoke-WebRequest to download the file.
+    Invoke-WebRequest -Uri $url -OutFile $outpath
+
+    #Run WUSA to begin the update.
+    wusa.exe C:\Admin\psinstall.msu /quiet /norestart
+}else
+{
+    exit
+}
+
+
