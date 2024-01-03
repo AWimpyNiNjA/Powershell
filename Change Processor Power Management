@@ -1,0 +1,17 @@
+# Get the active power scheme GUID
+
+$activeScheme = powercfg /GetActiveScheme
+$activeSchemeGuid = ($activeScheme -split ': ')[-1].Trim()
+$activeSchemeGuid = ($activeSchemeGuid -split ' ')[0]
+
+# Define processor power management GUIDs
+$processorPowerManagementGuid = '54533251-82be-4824-96c1-47b60b740d00'
+$minPowerStateGuid = '893dee8e-2bef-41e0-89c6-b55d0929964c'
+$maxPowerStateGuid = 'bc5038f7-23e0-4960-96da-33abaf5935ec'
+
+# Set the minimum processor state to 100%. Uncomment line 14 to also change the maximum state to 100 if required. This is usually not necessary, as maximum processor state is typically 100.
+powercfg /SetACValueIndex $activeSchemeGuid $processorPowerManagementGuid $minPowerStateGuid 100
+# powercfg /SetACValueIndex $activeSchemeGuid $processorPowerManagementGuid $maxPowerStateGuid 100
+
+# Make the changes effective immediately
+powercfg /SetActive $activeSchemeGuid
